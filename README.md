@@ -5,7 +5,7 @@ Convert SNPs in VCF format to PHYLIP, NEXUS, binary NEXUS, or FASTA alignments f
 ## 关键部分
 
 * `MIN_SAMPLES_LOCUS`：在每一个record中，**基因型不为`./.`的样本数目**，例如1/1、./.、./.、1/1、1/1五个样本中有2个为./.，这样的话`MIN_SAMPLES_LOCUS`就是3小于`minimum for phylogenetics`的4，因此就被忽略了
-* 该脚本具体的做法：如果基因型为1/1，那么就将该样本对应的fasta中写入alt对应的AGCT；如果是0/1(ref/alt=A/G)，则改位点可能是A、G，按照IUPAC的对应关系将会写入R；多个样本多行按照这个规则写入。
+* 该脚本具体的做法：如果基因型为`1/1`，那么就将该样本对应的fasta中写入`alt`对应的AGCT；如果是`0/1(ref/alt=A/G)`，则改位点可能是A、G，按照IUPAC的对应关系将会写入`R`；多个样本多行按照这个规则写入。
   * 程序使用的IUPAC的规则见下  
   * 原始的IUPAC规则可以参考[这个网站](https://www.bioinformatics.org/sms/iupac.html)
 
