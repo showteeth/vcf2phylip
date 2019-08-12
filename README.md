@@ -2,6 +2,34 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2540861.svg)](https://doi.org/10.5281/zenodo.2540861)  
 Convert SNPs in VCF format to PHYLIP, NEXUS, binary NEXUS, or FASTA alignments for phylogenetic analysis
 
+## 关键部分
+
+* `MIN_SAMPLES_LOCUS`：在每一个record中，**基因型不为`./.`的样本数目**，例如1/1、./.、./.、1/1、1/1五个样本中有2个为./.，这样的话`MIN_SAMPLES_LOCUS`就是3小于`minimum for phylogenetics`的4，因此就被忽略了
+* 该脚本具体的做法：如果基因型为1/1，那么就将该样本对应的fasta中写入alt对应的AGCT；如果是0/1(ref/alt=A/G)，则改位点可能是A、G，按照IUPAC的对应关系将会写入R；多个样本多行按照这个规则写入。
+  * 程序使用的IUPAC的规则见下  
+  * 原始的IUPAC规则可以参考[这个网站](https://www.bioinformatics.org/sms/iupac.html)
+
+```bash
+# Dictionary of IUPAC ambiguities for nucleotides
+# '*' means deletion for GATK (and other software?)
+# Deletions are ignored when making the consensus
+# Dictionary to translate IUPAC ambiguities, lowercase letters are used when "*" or "N" were present for a position,
+# however, software like Genious for example are case insensitive and will imply ignore capitalization
+amb = {"*":"-", "A":"A", "C":"C", "G":"G", "N":"N", "T":"T",
+       "*A":"a", "*C":"c", "*G":"g", "*N":"n", "*T":"t",
+       "AC":"M", "AG":"R", "AN":"a", "AT":"W", "CG":"S",
+       "CN":"c", "CT":"Y", "GN":"g", "GT":"K", "NT":"t",
+       "*AC":"m", "*AG":"r", "*AN":"a", "*AT":"w", "*CG":"s",
+       "*CN":"c", "*CT":"y", "*GN":"g", "*GT":"k", "*NT":"t",
+       "ACG":"V", "ACN":"m", "ACT":"H", "AGN":"r", "AGT":"D",
+       "ANT":"w", "CGN":"s", "CGT":"B", "CNT":"y", "GNT":"k",
+       "*ACG":"v", "*ACN":"m", "*ACT":"h", "*AGN":"r", "*AGT":"d",
+       "*ANT":"w", "*CGN":"s", "*CGT":"b", "*CNT":"y", "*GNT":"k",
+       "ACGN":"v", "ACGT":"N", "ACNT":"h", "AGNT":"d", "CGNT":"b",
+       "*ACGN":"v", "*ACGT":"N", "*ACNT":"h", "*AGNT":"d", "*CGNT":"b",
+       "*ACGNT":"N"}
+```
+
 ## _Brief description_
 This script takes as input a VCF file and will use the SNP genotypes to create a matrix for phylogenetic analysis in the PHYLIP (relaxed version), FASTA, NEXUS, or binary NEXUS formats. For heterozygous SNPs the consensus is made and the IUPAC nucleotide ambiguity codes are written to the final matrix(ces), any ploidy level is allowed and automatically detected. The code is optimized for large VCF matrices (hundreds of samples and millions of genotypes), for example, in our tests it processed a 20GB VCF (~3 million SNPs x 650 individuals) in ~27 minutes. The initial version of the script just produced a PHYLIP matrix but now we have added other popular formats, including the binary NEXUS file to run SNPs analysis with the SNAPP plugin in BEAST (only for diploid samples).
 
@@ -87,4 +115,5 @@ python vcf2phylip.py -i myfile.vcf -p -n
 ## _Citation_
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2540861.svg)](https://doi.org/10.5281/zenodo.2540861)  
 **Ortiz, E.M. 2019.** vcf2phylip v2.0: convert a VCF matrix into several matrix formats for phylogenetic analysis. DOI:10.5281/zenodo.2540861
+
 
